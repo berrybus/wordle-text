@@ -1,0 +1,89 @@
+import random
+
+# Can always add more
+target_list = ["kevin", "sever", "tiger", "aaaaa", "ebony", "sugar", "puppy", "adult", "novel", "pride", "prize", "reply", "count", "queen", "input", "honey", "homer", "tuner", "toner", "saber", "drain", "crime", "eliot", "japan", "naval", "anime", "dante", "brain"]
+
+target = random.choice(target_list)
+
+def grade_wordle(guess, target):
+    chars_left = list(target)
+    guess = list(guess)
+    
+    for i in range(len(guess)):
+        if guess[i] == target[i]:
+            chars_left.remove(guess[i])
+            guess[i] = "G"
+
+    for i in range(len(guess)):
+        if guess[i] == "G":
+            continue
+        if guess[i] in chars_left:
+            chars_left.remove(guess[i])
+            guess[i] = "Y"
+        else:
+            guess[i] = "R"
+
+    return "".join(guess)
+    
+green_matches = []
+yellow_matches = {}
+
+def is_valid_guess(guess, target):
+    if not hard_mode:
+        return True
+    guess = list(guess)
+    for i in green_matches:
+        if guess[i] != target[i]:
+            return False
+    for i in green_matches:
+        guess.remove(target[i])
+    
+    for char, count in yellow_matches.items():
+        if guess.count(char) < count:
+            return False
+    return True
+
+while True:
+    choice = input("Play with hard mode? (y/n): ")
+    if choice == "y":
+        hard_mode = True
+        break
+    if choice == "n":
+        hard_mode = False
+        break
+    print("Please enter a valid response (y/n): ")
+    
+for i in range(6):
+    while True:
+        guess = input("Please enter a {} letter word: ".format(len(target)))
+        if len(guess) == len(target):
+            if is_valid_guess(guess, target):
+                break
+            else:
+                print("Word not valid in hard mode")
+    res = grade_wordle(guess, target)
+    green_matches = []
+    yellow_matches = {}
+    res_format = ""
+    for r in res:
+        if r == "G":
+            res_format += "🟩"
+        elif r == "Y":
+            res_format += "🟨"
+        else:
+            res_format += "🟥"
+    print("Guess {}/6: ".format(i+1) + res_format)
+    if res == "G" * len(target):
+        break
+    for i, c in enumerate(res):
+        if c == "G":
+            green_matches.append(i)
+    mismatched = [guess[i] for i in range(len(res)) if res[i] == "Y"]
+    for c in mismatched:
+        yellow_matches[c] = yellow_matches.get(c, 0) + 1
+
+if res and res == "G" * len(target):
+    print("You got it!")
+else:
+    print("You lost! The word was:", target)
+    
